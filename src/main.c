@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +14,14 @@
 #include "shader_loader.h"
 #include "skybox.h"
 #include "street.h"
+
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    
+    glViewport(0, 0, width, height);
+}
+
 
 void print_matrix(const matrix4x4 m)
 {
@@ -41,6 +51,10 @@ int main(void)
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window);
+    
+    // !! Set the framebuffer size callback to adjust viewport on window resize
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // glewExperimental = GL_TRUE is required to prevent crashes
     glewExperimental = GL_TRUE;
@@ -74,9 +88,9 @@ int main(void)
         "textures/cloud_north.png",  // 5. Front (+Z or -Z depending on your camera)
         "textures/cloud_south.png" );  // 6. Back  (-Z or +Z)
     // Camera setup
-    vector3 eye = {0.0f, 2.0f, 5.0f};
-    vector3 target = {0.0f, 0.0f, 0.0f};
-    vector3 up = {0.0f, 1.0f, 0.0f};
+    vector3 eye = {0.0f, 1.5f, 5.0f};
+    vector3 target = {0.0f, 1.5f, -10.0f};
+    vector3 up = {0.0f, 1.0f, 0.0f}; // always 
 
     matrix4x4 view, projection, model;
     lookAt(view, eye, target, up);
@@ -95,29 +109,32 @@ int main(void)
     }
     cmo_to_rmo(model, model_rmo);
 
+   // Render loop
     // Render loop
     while (!glfwWindowShouldClose(window)) {
         // Clear buffers
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw skybox first (without lighting)
-        glUseProgram(skyboxShaderProgram);
-        glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "projection"),
-                           1, GL_FALSE, (float*)projection_rmo);
-        glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "view"),
-                           1, GL_FALSE, (float*)view_rmo);
-        glUniform1i(glGetUniformLocation(skyboxShaderProgram, "skybox"), 0);
-        skybox_draw(skybox, skyboxShaderProgram);
-
-        // Draw street
+        // ==========================================
+        // 1. DRAW STREET FIRST
+        // ==========================================
         glUseProgram(basicShaderProgram);
+        
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
-                           1, GL_FALSE, (float*)model_rmo);
+                           1, GL_TRUE, (float*)model_rmo);
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "view"),
-                           1, GL_FALSE, (float*)view_rmo);
+                           1, GL_TRUE, (float*)view_rmo);
+        
+        // Update projection matrix dynamically for window resizing
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        float aspect = (float)width / (float)(height > 0 ? height : 1);
+        perspective(projection, fovy, aspect, 0.1f, 100.0f);
+        cmo_to_rmo(projection, projection_rmo);
+        
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "projection"),
-                           1, GL_FALSE, (float*)projection_rmo);
+                           1, GL_TRUE, (float*)projection_rmo);
 
         // Set lighting uniforms
         vector3 lightPos = {5.0f, 5.0f, 5.0f};
@@ -134,15 +151,31 @@ int main(void)
         matrix3x3 normalMatrix;
         compute_normal_matrix(normalMatrix, model_rmo);
         glUniformMatrix3fv(glGetUniformLocation(basicShaderProgram, "normalMatrix"),
-                           1, GL_FALSE, (float*)normalMatrix);
+                           1, GL_TRUE, (float*)normalMatrix);
 
         street_draw(street, basicShaderProgram);
+
+        // ==========================================
+        // 2. DRAW SKYBOX LAST
+        // ==========================================
+        glDepthFunc(GL_LEQUAL); // Trick the depth buffer
+        glUseProgram(skyboxShaderProgram);
+        
+        // NOTICE: USING GL_TRUE HERE FOR THE SKYBOX MATRICES TOO!
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "projection"),
+                           1, GL_TRUE, (float*)projection_rmo);
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "view"),
+                           1, GL_TRUE, (float*)view_rmo);
+                           
+        glUniform1i(glGetUniformLocation(skyboxShaderProgram, "skybox"), 0);
+        
+        skybox_draw(skybox, skyboxShaderProgram);
+        glDepthFunc(GL_LESS); // Restore default depth buffer behavior
 
         // Swap buffers and check for events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
     // Cleanup
     street_destroy(street);
     skybox_destroy(skybox);

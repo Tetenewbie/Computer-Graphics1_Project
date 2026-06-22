@@ -59,7 +59,6 @@ Skybox* skybox_create(const char* right, const char* left, const char* top,
     glGenVertexArrays(1, &skybox->VAO);
     glGenBuffers(1, &skybox->VBO);
     glBindVertexArray(skybox->VAO);
-    
     glBindBuffer(GL_ARRAY_BUFFER, skybox->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -76,15 +75,23 @@ Skybox* skybox_create(const char* right, const char* left, const char* top,
         GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
     };
 
+    int loaded_count = 0;
     for (int i = 0; i < 6; i++) {
         int width, height, nrChannels;
         unsigned char* data = stbi_load(faces[i], &width, &height, &nrChannels, 0);
         if (data) {
-            glTexImage2D(targets[i], 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            printf("✓ Loaded skybox face: %s (%dx%d)\n", faces[i], width, height);
+            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+            glTexImage2D(targets[i], 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
+            loaded_count++;
         } else {
-            printf("Failed to load skybox texture: %s\n", faces[i]);
+            printf("✗ Failed to load skybox texture: %s\n", faces[i]);
         }
+    }
+
+    if (loaded_count < 6) {
+        printf("Warning: Only loaded %d/6 skybox textures. Skybox may not render correctly.\n", loaded_count);
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -92,6 +99,9 @@ Skybox* skybox_create(const char* right, const char* left, const char* top,
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     return skybox;
 }

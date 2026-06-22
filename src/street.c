@@ -2,23 +2,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define STB_IMAGE_IMPLEMENTATION
+// #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 Street* street_create(const char* textureFile)
 {
     Street* street = malloc(sizeof(Street));
 
-    // Simple street plane 
+    
     float streetVertices[] = {
-        // positions         // normals          // texture coords
-        -10.0f,  0.0f, -10.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-         10.0f,  0.0f, -10.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-         10.0f,  0.0f,  10.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+        // positions             // normals           // tex coords
+        -10.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,   0.0f,  20.0f,  // Top Left
+         10.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,   1.0f,  20.0f,  // Top Right
+         10.0f,  0.0f,   10.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
 
-        -10.0f,  0.0f, -10.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-         10.0f,  0.0f,  10.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
-        -10.0f,  0.0f,  10.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f
+        -10.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,   0.0f,  20.0f,  // Top Left
+         10.0f,  0.0f,   10.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
+        -10.0f,  0.0f,   10.0f,   0.0f, 1.0f, 0.0f,   0.0f,   0.0f   // Bottom Left
     };
 
     street->vertexCount = 6;
@@ -48,7 +48,7 @@ Street* street_create(const char* textureFile)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // fixed min filter to use mipmaps
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
