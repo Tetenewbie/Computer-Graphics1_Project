@@ -9,7 +9,7 @@ Street* street_create(const char* textureFile)
 {
     Street* street = malloc(sizeof(Street));
 
-    // Simple street plane (flat quad)
+    // Simple street plane 
     float streetVertices[] = {
         // positions         // normals          // texture coords
         -10.0f,  0.0f, -10.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,

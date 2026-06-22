@@ -8,7 +8,7 @@ bool load_obj(const char *path, ModelData *out_model) {
 
     FILE *file = fopen(path, "r");
     if (file == NULL) {
-        printf("Impossible to open the file! Are you crazy ?\n");
+        printf("Impossible to open the file! Are you crazy brooooo ?\n");
         return false;
     }
 
@@ -99,7 +99,7 @@ bool load_obj(const char *path, ModelData *out_model) {
                 out_model->vertex_count++;
             }
         } else {
-            // we do not care about other lines such as comments infos etc, just skip them 
+            // Skip unrecognized lines
             char stupidBuffer[1000];
             fgets(stupidBuffer, 1000, file);
         }

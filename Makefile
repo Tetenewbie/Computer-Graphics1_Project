@@ -1,7 +1,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -g -Wno-unused-parameter
-LDFLAGS = -lglfw -lglew -lGL -lm
+LDFLAGS = -lglfw -lGLEW -lGL -lm
 
 # Directories
 SRC_DIR = src

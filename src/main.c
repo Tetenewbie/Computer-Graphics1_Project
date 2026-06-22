@@ -63,16 +63,16 @@ int main(void)
     }
 
     // Create street (you need to provide a street texture)
-    Street* street = street_create("textures/street.png");
+    Street* street = street_create("textures/road.png");
 
     // Create skybox (you need to provide 6 skybox textures)
-    Skybox* skybox = skybox_create("textures/skybox_right.png",
-                                    "textures/skybox_left.png",
-                                    "textures/skybox_top.png",
-                                    "textures/skybox_bottom.png",
-                                    "textures/skybox_front.png",
-                                    "textures/skybox_back.png");
-
+   Skybox* skybox = skybox_create (
+        "textures/cloud_east.png",   // 1. Right (+X)
+        "textures/cloud_west.png",   // 2. Left  (-X)
+        "textures/cloud_up.png",     // 3. Top   (+Y)
+        "textures/cloud_down.png",   // 4. Bottom(-Y)
+        "textures/cloud_north.png",  // 5. Front (+Z or -Z depending on your camera)
+        "textures/cloud_south.png" );  // 6. Back  (-Z or +Z)
     // Camera setup
     vector3 eye = {0.0f, 2.0f, 5.0f};
     vector3 target = {0.0f, 0.0f, 0.0f};

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define STB_IMAGE_IMPLEMENTATION
+// #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 Skybox* skybox_create(const char* right, const char* left, const char* top,
@@ -59,9 +59,10 @@ Skybox* skybox_create(const char* right, const char* left, const char* top,
     glGenVertexArrays(1, &skybox->VAO);
     glGenBuffers(1, &skybox->VBO);
     glBindVertexArray(skybox->VAO);
+    
     glBindBuffer(GL_ARRAY_BUFFER, skybox->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribPointer(0);
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // Load cubemap textures
