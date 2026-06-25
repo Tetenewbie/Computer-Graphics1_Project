@@ -21,13 +21,13 @@
 Street *street;
 Skybox *skybox;
 
+GLuint carTextureID;
 GLuint basicShaderProgram;
 GLuint skyboxShaderProgram;
 GLuint vertexArrayObject;
     size_t carSize;
 
 // just float[16]
-matrix4x4 view_rmo, projection_rmo, model_rmo;
 matrix4x4 view, projection, model;
 
 float fovy = 45.0f * 3.14159f / 180.0f;
@@ -92,13 +92,9 @@ int init(void) {
 
     perspective(projection, fovy, 1280.0f / 720.0f, 0.1f, 100.0f);
 
-    // Convert to row-major order for OpenGL
-    cmo_to_rmo(view, view_rmo);
-    cmo_to_rmo(projection, projection_rmo);
 
     // Set up matrices as identity for model
     identity(model);
-    cmo_to_rmo(model, model_rmo);
     
     float *carObj = loadObj("objects/car.obj", &carSize);
     GLuint triangleVertexBufferObject;
@@ -143,6 +139,29 @@ int init(void) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // glBindVertexArray(0);
 
+    glGenTextures(1, &carTextureID);
+    glBindTexture(GL_TEXTURE_2D, carTextureID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // fixed min filter to use mipmaps
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("textures/blue_metal_plate_diff_4k.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
+    } else {
+        printf("Failed to load car texture\n");
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+
     free(carObj);
     carObj = 0;
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -158,20 +177,20 @@ void draw(void) {
         // ==========================================
         glUseProgram(basicShaderProgram);
         
+        identity(model);
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
-                           1, GL_TRUE, (float*)model_rmo);
+                           1, GL_FALSE, (float*)model);
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "view"),
-                           1, GL_TRUE, (float*)view_rmo);
+                           1, GL_FALSE, (float*)view);
         
         // Update projection matrix dynamically for window resizing
         int width, height;
         glfwGetWindowSize(window, &width, &height);
         float aspect = (float)width / (float)(height > 0 ? height : 1);
         perspective(projection, fovy, aspect, 0.1f, 100.0f);
-        cmo_to_rmo(projection, projection_rmo);
         
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "projection"),
-                           1, GL_TRUE, (float*)projection_rmo);
+                           1, GL_FALSE, (float*)projection);
 
         // Set lighting uniforms
         vector3 lightPos = {5.0f, 5.0f, 5.0f};
@@ -186,9 +205,9 @@ void draw(void) {
 
         // Compute normal matrix
         matrix3x3 normalMatrix;
-        compute_normal_matrix(normalMatrix, model_rmo);
+        compute_normal_matrix(normalMatrix, model);
         glUniformMatrix3fv(glGetUniformLocation(basicShaderProgram, "normalMatrix"),
-                           1, GL_TRUE, (float*)normalMatrix);
+                           1, GL_FALSE, (float*)normalMatrix);
 
         street_draw(street, basicShaderProgram);
 
@@ -200,9 +219,9 @@ void draw(void) {
         
         // NOTICE: USING GL_TRUE HERE FOR THE SKYBOX MATRICES TOO!
         glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "projection"),
-                           1, GL_TRUE, (float*)projection_rmo);
+                           1, GL_FALSE, (float*)projection);
         glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "view"),
-                           1, GL_TRUE, (float*)view_rmo);
+                           1, GL_FALSE, (float*)view);
                            
         glUniform1i(glGetUniformLocation(skyboxShaderProgram, "skybox"), 0);
         
@@ -214,9 +233,10 @@ void draw(void) {
         // 3. DRAW CAR OBJECT 
         // 
 
-        glActiveTexture(GL_TEXTURE0);
         glUseProgram(basicShaderProgram);
         glBindVertexArray(vertexArrayObject);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, carTextureID);
 
         
         matrix4x4 worldMat;
@@ -228,14 +248,18 @@ void draw(void) {
 
         translate(worldMat, worldMat, (Vec3) {-0.7f,0.1f,0.1f});
         scale(translation, translation, (Vec3) {0.5f,0.5f,0.5f});
+        // scale(translation, translation, (Vec3) {2.0f,2.0f,2.0f});
         
         // (model * T) * worldMat
         multiply(model, worldMat, translation);  // model = T * S
         // scale(model, model, (Vec3) {0.1f,0.1f,0.1f});
         // for (int i = 0; i<16;i++)
         //     model[i] = 0;
+
+        // glUniform1i(glGetUniformLocation(basicShaderProgram, "diffuseTexture"), 0);
+
         glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
-                           1, GL_TRUE, (float*)model);
+                           1, GL_FALSE, (float*)model);
 
 
                            glDrawArrays(GL_TRIANGLES, 0, carSize);
