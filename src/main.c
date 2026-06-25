@@ -23,13 +23,15 @@ Skybox *skybox;
 
 GLuint basicShaderProgram;
 GLuint skyboxShaderProgram;
+GLuint vertexArrayObject;
+    size_t carSize;
 
 // just float[16]
 matrix4x4 view_rmo, projection_rmo, model_rmo;
 matrix4x4 view, projection, model;
 
 float fovy = 45.0f * 3.14159f / 180.0f;
-Vec3 eye = {0.0f, 1.5f, 5.0f};
+Vec3 eye = {25.0f, 10.0f, 30.0f};
 
 GLFWwindow* window;
 
@@ -95,15 +97,60 @@ int init(void) {
     cmo_to_rmo(projection, projection_rmo);
 
     // Set up matrices as identity for model
-    for (int i = 0; i < 16; i++) {
-        model[i] = (i % 5 == 0) ? 1.0f : 0.0f;
-    }
+    identity(model);
     cmo_to_rmo(model, model_rmo);
+    
+    float *carObj = loadObj("objects/car.obj", &carSize);
+    GLuint triangleVertexBufferObject;
+    glGenBuffers(1, &triangleVertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVertexBufferObject);
+    // segments ist hier die Anzahl der Vertices. Jeder Vertex hat 8 Floats (3 Pos + 2 Tex + 3 Norm)
+    glBufferData(GL_ARRAY_BUFFER, carSize * 8 * sizeof(float), carObj, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // create vertex array object
+    glGenVertexArrays(1, &vertexArrayObject);
+    glBindVertexArray(vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVertexBufferObject);
+    glVertexAttribPointer(
+        0, // location aus vertex shader
+        3, // wieviele elemente werden rausgenommen?
+        GL_FLOAT,
+        GL_FALSE,
+        8*sizeof(GLfloat), // <--- stride MUSS hier 8 sein! (3+2+3)
+        0
+    );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer( // textur
+        1, // location aus vertex shader
+        2, 
+        GL_FLOAT,
+        GL_FALSE,
+        8*sizeof(GLfloat), // <--- stride MUSS hier 8 sein!
+        (GLvoid*)(3 * sizeof(GLfloat))
+    );
+    glEnableVertexAttribArray(1);
+    
+    glVertexAttribPointer( // normalenvektor
+        2, // location aus vertex shader
+        3, 
+        GL_FLOAT,
+        GL_FALSE,
+        8*sizeof(GLfloat), // <--- stride MUSS hier 8 sein!
+        (GLvoid*)(5 * sizeof(GLfloat))
+    );
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0);
+
+    free(carObj);
+    carObj = 0;
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
 }
 
 void draw(void) {
             // Clear buffers
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // ==========================================
@@ -161,6 +208,38 @@ void draw(void) {
         
         skybox_draw(skybox, skyboxShaderProgram);
         glDepthFunc(GL_LESS); // Restore default depth buffer behavior
+
+    
+        // 
+        // 3. DRAW CAR OBJECT 
+        // 
+
+        glActiveTexture(GL_TEXTURE0);
+        glUseProgram(basicShaderProgram);
+        glBindVertexArray(vertexArrayObject);
+
+        
+        matrix4x4 worldMat;
+        // matrix4x4 rotation;
+        matrix4x4 translation;
+        identity(model);
+        identity(worldMat);
+        identity(translation);
+
+        translate(worldMat, worldMat, (Vec3) {-0.7f,0.1f,0.1f});
+        scale(translation, translation, (Vec3) {0.5f,0.5f,0.5f});
+        
+        // (model * T) * worldMat
+        multiply(model, worldMat, translation);  // model = T * S
+        // scale(model, model, (Vec3) {0.1f,0.1f,0.1f});
+        // for (int i = 0; i<16;i++)
+        //     model[i] = 0;
+        glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
+                           1, GL_TRUE, (float*)model);
+
+
+                           glDrawArrays(GL_TRIANGLES, 0, carSize);
+
 
 
 }

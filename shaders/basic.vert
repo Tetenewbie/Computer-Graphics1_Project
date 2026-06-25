@@ -2,8 +2,8 @@
 
 // Input data from your 3D models (.obj files)
 layout (location = 0) in vec3 aPos;       // Vertex Position
-layout (location = 1) in vec3 aNormal;    // Vertex Normal (for lighting)
-layout (location = 2) in vec2 aTexCoords; // Texture Coordinates (for images)
+layout (location = 1) in vec2 aTexCoords; // Texture Coordinates (for images)
+layout (location = 2) in vec3 aNormal;    // Vertex Normal (for lighting)
 
 
 out vec3 FragPos;  
@@ -19,6 +19,7 @@ uniform mat3 normalMatrix; // Your custom 3x3 normal matrix!
 void main()
 {
     //Calculate where the pixel is in the 3D world
+    // model matrix = umView * umWorld * umRotation
     FragPos = vec3(model * vec4(aPos, 1.0));
     
     // normal for 

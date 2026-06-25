@@ -1,3 +1,6 @@
+#ifndef loadobj_c_guard
+#define loadobj_c_guard 1
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,3 +114,5 @@ float* loadObj(char* location, size_t* vertexCount) {
   *vertexCount = 3 * fCount;
   return (float*)buffer;
 };
+
+#endif

@@ -54,6 +54,7 @@ void main()
     // Mix the original color with the fog color based on distance
     vec3 finalColor = mix(fogColor, result, fogFactor);
 
-    FragColor = vec4(finalColor, 1.0);
+    // FragColor = vec4(finalColor, 1.0);
+    FragColor = vec4(result, 1.0);
 
 }
