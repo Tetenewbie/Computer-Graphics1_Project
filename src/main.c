@@ -7,6 +7,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <stdbool.h>
 
 #include "camera.h"
 #include "matrix.h"
@@ -23,6 +24,9 @@ Street *street;
 Skybox *skybox;
 DrawObject *carObj = NULL;
 
+float carZPosition = -50.0f;
+float carAcceleration = 0.0f;
+
 
 GLuint carTextureID;
 GLuint basicShaderProgram;
@@ -35,6 +39,9 @@ matrix4x4 view, projection, model;
 
 float fovy = 45.0f * 3.14159f / 180.0f;
 Vec3 eye = {25.0f, 10.0f, 30.0f};
+Vec3 target = {0.0f, 1.5f, -10.0f};
+Vec3 up = {0.0f, 1.0f, 0.0f}; // always 
+
 
 GLFWwindow* window;
 
@@ -89,9 +96,7 @@ int init(void) {
         "textures/cloud_south.png" );  // 6. Back  (-Z or +Z)
     // Camera setup
     // eye = {0.0f, 1.5f, 5.0f};
-    vector3 target = {0.0f, 1.5f, -10.0f};
-    vector3 up = {0.0f, 1.0f, 0.0f}; // always 
-
+    
     lookAt(view, eye, target, up);
 
     perspective(projection, fovy, 1280.0f / 720.0f, 0.1f, 100.0f);
@@ -106,9 +111,47 @@ int init(void) {
 
 }
 
+float clamp (float value, float min, float max) {
+    if (value > max)
+        return max;
+    if (value < min)
+        return min;
+    return value;
+}
+void handleInputs(void) {
+    printf("\rCar Z: %.4f", carZPosition);
+    fflush(stdout);
+    bool action = false;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        // printf("wwww\n");
+        carAcceleration = clamp(carAcceleration + 0.05, -2, 2);
+        action = true;
+    } 
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        // printf("wwww\n");
+        carAcceleration = clamp(carAcceleration - 0.05, -2, 2);
+        action = true;
+    } 
+    if (!action) {
+        if (carAcceleration >= -0.01 && carAcceleration <= -0.01)
+        carAcceleration = 0;
+        if (carAcceleration > 0) {
+            carAcceleration = clamp(carAcceleration - 0.01, 0, 2);
+        } else if (carAcceleration < 0) {
+            carAcceleration = clamp(carAcceleration + 0.01, -2, 0);
+            
+        } 
+        carZPosition += carAcceleration;
+    } else 
+        carZPosition += carAcceleration;
+}
+
 void draw(void) {
             // Clear buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        handleInputs();
+        target[2] = carZPosition;
+        lookAt(view, eye, target, up);
 
         // ==========================================
         // 1. DRAW STREET FIRST
@@ -180,10 +223,12 @@ void draw(void) {
         identity(worldMat);
         identity(translation);
 
-        translate(worldMat, worldMat, (Vec3) {-0.7f,0.1f,0.1f});
+        translate(worldMat, worldMat, (Vec3) {-5.0f,0.1f,0.0f});
+        translate(worldMat, worldMat, (Vec3) {0.0f,0.0f, carZPosition});
         scale(translation, translation, (Vec3) {0.5f,0.5f,0.5f});
         multiply(model, worldMat, translation);  // model = T * S
         memcpy(carObj->modelMat, model, sizeof(carObj->modelMat));
+        
         object_draw(carObj, basicShaderProgram);
         // glUniform1i(glGetUniformLocation(basicShaderProgram, "diffuseTexture"), 0);
         // glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),

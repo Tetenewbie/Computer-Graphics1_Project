@@ -43,8 +43,8 @@ void main()
 
     // FOG MATH
     float distance = length(viewPos - FragPos);
-    float fogNear = 10.0; // Where fog starts
-    float fogFar = 40.0;  // Where road becomes completely invisible
+    float fogNear = 70.0; // Where fog starts
+    float fogFar = 100.0;  // Where road becomes completely invisible
     float fogFactor = (fogFar - distance) / (fogFar - fogNear);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
     
@@ -54,7 +54,7 @@ void main()
     // Mix the original color with the fog color based on distance
     vec3 finalColor = mix(fogColor, result, fogFactor);
 
-    // FragColor = vec4(finalColor, 1.0);
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(finalColor, 1.0);
+    // FragColor = vec4(result, 1.0);
 
 }

@@ -12,13 +12,13 @@ Street* street_create(const char* textureFile)
     
     float streetVertices[] = {
         // positions             // normals           // tex coords
-        -10.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,   0.0f,  20.0f,  // Top Left
-         10.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,   1.0f,  20.0f,  // Top Right
-         10.0f,  0.0f,   10.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
+        -10.0f,  0.0f, -1000.0f,   0.0f, 1.0f, 0.0f,   0.0f,  200.0f,  // Top Left
+         10.0f,  0.0f, -1000.0f,   0.0f, 1.0f, 0.0f,   1.0f,  200.0f,  // Top Right
+         10.0f,  0.0f,   100.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
 
-        -10.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,   0.0f,  20.0f,  // Top Left
-         10.0f,  0.0f,   10.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
-        -10.0f,  0.0f,   10.0f,   0.0f, 1.0f, 0.0f,   0.0f,   0.0f   // Bottom Left
+        -10.0f,  0.0f, -1000.0f,   0.0f, 1.0f, 0.0f,   0.0f,  200.0f,  // Top Left
+         10.0f,  0.0f,   100.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
+        -10.0f,  0.0f,   100.0f,   0.0f, 1.0f, 0.0f,   0.0f,   0.0f   // Bottom Left
     };
 
     street->vertexCount = 6;
