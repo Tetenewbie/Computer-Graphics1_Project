@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "camera.h"
 #include "matrix.h"
@@ -23,6 +24,8 @@
 Street *street;
 Skybox *skybox;
 DrawObject *carObj = NULL;
+// DrawObject *cloudObj = NULL;
+DrawObject *clouds[16];
 
 float carZPosition = -50.0f;
 float carAcceleration = 0.0f;
@@ -107,6 +110,26 @@ int init(void) {
 
     carObj = object_create("objects/car.obj");
     load_texture("textures/blue_metal_plate_diff_4k.jpg", &carObj->textureID);
+    GLuint whitenoiseId;
+    load_texture("textures/whitenoise.png", &whitenoiseId);
+        srand(time(NULL));
+
+    for (int i = 0; i<16; i++) {
+        clouds[i] = object_create("objects/cloud.obj");
+        clouds[i]->textureID = whitenoiseId;
+        identity(model);
+        if (i < 8)
+            translate(model, model, (Vec3){-7.0f+1.5*i, 0.5f, -50});
+        else
+            translate(model, model, (Vec3){-7.0f+1.5*(i-8), 0.5f, 95});
+            
+        scale(model, model, (Vec3){2.0f, 2.0f, 2.0f});
+        rotatex(model, model, rand());
+        // rotatey(model, model, rand());
+        rotatez(model, model, rand());
+        memcpy(clouds[i]->modelMat, model, sizeof(clouds[i]->modelMat));
+    // -60, 100
+    }
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 }
@@ -230,6 +253,20 @@ void draw(void) {
         memcpy(carObj->modelMat, model, sizeof(carObj->modelMat));
         
         object_draw(carObj, basicShaderProgram);
+        
+
+        // 
+        // 5. TRANSPARENT OBJECTS
+        //
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glUniform1f(glGetUniformLocation(basicShaderProgram, "alpha"), 0.2);
+        for (int i = 0; i < 16; i++) {
+            object_draw(clouds[i], basicShaderProgram);
+        }
+        glUniform1f(glGetUniformLocation(basicShaderProgram, "alpha"), 1);
+        glDisable(GL_BLEND);
+        
         // glUniform1i(glGetUniformLocation(basicShaderProgram, "diffuseTexture"), 0);
         // glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
         //                    1, GL_FALSE, (float*)model);

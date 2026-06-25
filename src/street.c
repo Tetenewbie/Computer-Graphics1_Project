@@ -1,7 +1,7 @@
 #include "street.h"
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "object_loader.h"
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -10,8 +10,10 @@ Street* street_create(const char* textureFile)
     Street* street = malloc(sizeof(Street));
 
     
+
+    // care, in basic.vert ist das layout anders (positions 0, texcoords 1, normals 2)
     float streetVertices[] = {
-        // positions             // normals           // tex coords
+        // positions               // normals          // tex coords
         -10.0f,  0.0f, -1000.0f,   0.0f, 1.0f, 0.0f,   0.0f,  200.0f,  // Top Left
          10.0f,  0.0f, -1000.0f,   0.0f, 1.0f, 0.0f,   1.0f,  200.0f,  // Top Right
          10.0f,  0.0f,   100.0f,   0.0f, 1.0f, 0.0f,   1.0f,   0.0f,  // Bottom Right
@@ -44,26 +46,8 @@ Street* street_create(const char* textureFile)
     glEnableVertexAttribArray(1);
 
     // Load texture
-    glGenTextures(1, &street->textureID);
-    glBindTexture(GL_TEXTURE_2D, street->textureID);
+    load_texture(textureFile, &street->textureID);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // fixed min filter to use mipmaps
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(textureFile, &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    } else {
-        printf("Failed to load street texture: %s\n", textureFile);
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     return street;
