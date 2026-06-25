@@ -13,14 +13,17 @@ void identity(matrix4x4 out)
 
 void multiply(matrix4x4 out, const matrix4x4 left, const matrix4x4 right) 
 {
+    // tmp variable für den fall dass out = left oder out = right
+    matrix4x4 tmp;
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
-            out[c * 4 + r] = left[0 * 4 + r] * right[c * 4 + 0] +
+            tmp[c * 4 + r] = left[0 * 4 + r] * right[c * 4 + 0] +
                              left[1 * 4 + r] * right[c * 4 + 1] +
                              left[2 * 4 + r] * right[c * 4 + 2] +
                              left[3 * 4 + r] * right[c * 4 + 3];
         }
     }
+    memcpy(out, tmp, sizeof(matrix4x4));
 }
 
 void translate(matrix4x4 out, const matrix4x4 in, const vector3 offset) 
@@ -92,11 +95,13 @@ void rotatez(matrix4x4 out, const matrix4x4 in, float angle_rads)
 
 void cmo_to_rmo(const matrix4x4 cmo, matrix4x4 rmo) 
 {
+    matrix4x4 tmp;
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
-            rmo[r * 4 + c] = cmo[c * 4 + r];
+            tmp[r * 4 + c] = cmo[c * 4 + r];
         }
     }
+    memcpy(rmo, tmp, sizeof(matrix4x4));
 }
 
 int invert3x3(matrix3x3 out, const matrix3x3 in) 
