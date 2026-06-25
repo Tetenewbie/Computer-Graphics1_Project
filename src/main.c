@@ -22,6 +22,7 @@
 
 
 Street *street;
+Street *pavement[2];
 Skybox *skybox;
 DrawObject *carObj = NULL;
 // DrawObject *cloudObj = NULL;
@@ -42,7 +43,7 @@ matrix4x4 view, projection, model;
 
 float fovy = 45.0f * 3.14159f / 180.0f;
 Vec3 eye = {25.0f, 10.0f, 30.0f};
-Vec3 target = {0.0f, 1.5f, -10.0f};
+Vec3 target = {0.0f, 1.5f, -10.0f}; // z coordinate gets changed to aim at car
 Vec3 up = {0.0f, 1.0f, 0.0f}; // always 
 
 
@@ -88,6 +89,8 @@ int init(void) {
 
     // Create street (you need to provide a street texture)
     street = street_create("textures/road.png");
+    pavement[0] = pavement_create("textures/brick_pavement_03_diff_1k.jpg", true);
+    pavement[1] = pavement_create("textures/brick_pavement_03_diff_1k.jpg", false);
 
     // Create skybox (you need to provide 6 skybox textures)
     skybox = skybox_create (
@@ -214,6 +217,9 @@ void draw(void) {
                            1, GL_FALSE, (float*)normalMatrix);
 
         street_draw(street, basicShaderProgram);
+        
+        street_draw(pavement[0], basicShaderProgram);
+        street_draw(pavement[1], basicShaderProgram);
 
         // ==========================================
         // 2. DRAW SKYBOX LAST

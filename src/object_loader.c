@@ -8,15 +8,29 @@
 
 DrawObject* object_create(const char* objectFile)
 {
+    size_t vertexCount;
+    float *carObj = loadObj((char *)objectFile, &vertexCount);
+
+    DrawObject *o = object_create_from_vertices(carObj, vertexCount);
+    free(carObj);
+    carObj = 0;
+
+    return o;
+}
+DrawObject *object_create_from_vertices(float *carObj, size_t vertexCount) {
     DrawObject* object = malloc(sizeof(DrawObject));
+    object->vertexCount = vertexCount;
+    
     identity(object->modelMat);
-    float *carObj = loadObj((char *)objectFile, &object->vertexCount);
     GLuint triangleVertexBufferObject;
     glGenBuffers(1, &triangleVertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, triangleVertexBufferObject);
     // segments ist hier die Anzahl der Vertices. Jeder Vertex hat 8 Floats (3 Pos + 2 Tex + 3 Norm)
     glBufferData(GL_ARRAY_BUFFER, object->vertexCount * 8 * sizeof(float), carObj, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    object->VBO = triangleVertexBufferObject;
+
     // create vertex array object
     glGenVertexArrays(1, &object->VAO);
     glBindVertexArray(object->VAO);
@@ -56,11 +70,7 @@ DrawObject* object_create(const char* objectFile)
 
     glBindVertexArray(0);
 
-
-    free(carObj);
-    carObj = 0;
     return object;
-
 }
 
 void load_texture(char *textureFile, GLuint *texture) {

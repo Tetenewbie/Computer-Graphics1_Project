@@ -15,5 +15,5 @@ typedef struct {
 DrawObject* object_create(const char* textureFile);
 void load_texture(char *textureFile, GLuint *texture);
 void object_draw(DrawObject* street, GLuint shaderProgram);
-
+DrawObject *object_create_from_vertices(float *carObj, size_t vertexCount);
 #endif
