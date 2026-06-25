@@ -15,6 +15,24 @@
 #include "skybox.h"
 #include "street.h"
 
+#include "../objects/loadObj.c"
+
+
+Street *street;
+Skybox *skybox;
+
+GLuint basicShaderProgram;
+GLuint skyboxShaderProgram;
+
+// just float[16]
+matrix4x4 view_rmo, projection_rmo, model_rmo;
+matrix4x4 view, projection, model;
+
+float fovy = 45.0f * 3.14159f / 180.0f;
+Vec3 eye = {0.0f, 1.5f, 5.0f};
+
+GLFWwindow* window;
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -30,31 +48,7 @@ void print_matrix(const matrix4x4 m)
     }
 }
 
-int main(void)
-{
-    // 1. Start up GLFW
-    if (!glfwInit()) {
-        printf("Failed to initialize GLFW\n");
-        return -1;
-    }
-
-    // Tell GLFW to use modern OpenGL (3.3 Core)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // Create the Window
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Street with Skybox", NULL, NULL);
-    if (window == NULL) {
-        printf("Failed to create window\n");
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwMakeContextCurrent(window);
-    
-    // !! Set the framebuffer size callback to adjust viewport on window resize
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+int init(void) {
 
     // glewExperimental = GL_TRUE is required to prevent crashes
     glewExperimental = GL_TRUE;
@@ -67,8 +61,8 @@ int main(void)
     glEnable(GL_DEPTH_TEST);
 
     // Load shaders
-    GLuint basicShaderProgram = load_shader("shaders/basic.vert", "shaders/basic.frag");
-    GLuint skyboxShaderProgram = load_shader("shaders/skybox.vert", "shaders/skybox.frag");
+    basicShaderProgram = load_shader("shaders/basic.vert", "shaders/basic.frag");
+    skyboxShaderProgram = load_shader("shaders/skybox.vert", "shaders/skybox.frag");
 
     if (!basicShaderProgram || !skyboxShaderProgram) {
         printf("Failed to load shaders\n");
@@ -77,10 +71,10 @@ int main(void)
     }
 
     // Create street (you need to provide a street texture)
-    Street* street = street_create("textures/road.png");
+    street = street_create("textures/road.png");
 
     // Create skybox (you need to provide 6 skybox textures)
-   Skybox* skybox = skybox_create (
+    skybox = skybox_create (
         "textures/cloud_east.png",   // 1. Right (+X)
         "textures/cloud_west.png",   // 2. Left  (-X)
         "textures/cloud_up.png",     // 3. Top   (+Y)
@@ -88,18 +82,15 @@ int main(void)
         "textures/cloud_north.png",  // 5. Front (+Z or -Z depending on your camera)
         "textures/cloud_south.png" );  // 6. Back  (-Z or +Z)
     // Camera setup
-    vector3 eye = {0.0f, 1.5f, 5.0f};
+    // eye = {0.0f, 1.5f, 5.0f};
     vector3 target = {0.0f, 1.5f, -10.0f};
     vector3 up = {0.0f, 1.0f, 0.0f}; // always 
 
-    matrix4x4 view, projection, model;
     lookAt(view, eye, target, up);
 
-    float fovy = 45.0f * 3.14159f / 180.0f;
     perspective(projection, fovy, 1280.0f / 720.0f, 0.1f, 100.0f);
 
     // Convert to row-major order for OpenGL
-    matrix4x4 view_rmo, projection_rmo, model_rmo;
     cmo_to_rmo(view, view_rmo);
     cmo_to_rmo(projection, projection_rmo);
 
@@ -108,11 +99,10 @@ int main(void)
         model[i] = (i % 5 == 0) ? 1.0f : 0.0f;
     }
     cmo_to_rmo(model, model_rmo);
+}
 
-   // Render loop
-    // Render loop
-    while (!glfwWindowShouldClose(window)) {
-        // Clear buffers
+void draw(void) {
+            // Clear buffers
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -172,6 +162,43 @@ int main(void)
         skybox_draw(skybox, skyboxShaderProgram);
         glDepthFunc(GL_LESS); // Restore default depth buffer behavior
 
+
+}
+
+
+int main(void)
+{
+    // 1. Start up GLFW
+    if (!glfwInit()) {
+        printf("Failed to initialize GLFW\n");
+        return -1;
+    }
+
+    // Tell GLFW to use modern OpenGL (3.3 Core)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // Create the Window
+    window = glfwCreateWindow(1280, 720, "Street with Skybox", NULL, NULL);
+    if (window == NULL) {
+        printf("Failed to create window\n");
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window);
+    
+    // !! Set the framebuffer size callback to adjust viewport on window resize
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    if (init() == -1) {
+        printf("Init failed\n");
+        return -1;
+    }
+    // Render loop
+    while (!glfwWindowShouldClose(window)) {
+        draw();
         // Swap buffers and check for events
         glfwSwapBuffers(window);
         glfwPollEvents();

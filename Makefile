@@ -1,7 +1,10 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -g -Wno-unused-parameter
-LDFLAGS = -lglfw -lGLEW -lGL -lm
+GLEW_LIBS=$(shell pkgconf glew --libs)
+GLFW_LIBS=$(shell pkgconf glfw3 --libs)
+LDFLAGS = -lglfw $(GLEW_LIBS) $(GLFW_LIBS) -lGL -lm
+
 
 # Directories
 SRC_DIR = src
