@@ -14,12 +14,15 @@
 #include "shader_loader.h"
 #include "skybox.h"
 #include "street.h"
+#include "object_loader.h"
 
-#include "../objects/loadObj.c"
+#include "loadObj.h"
 
 
 Street *street;
 Skybox *skybox;
+DrawObject *carObj = NULL;
+
 
 GLuint carTextureID;
 GLuint basicShaderProgram;
@@ -34,6 +37,7 @@ float fovy = 45.0f * 3.14159f / 180.0f;
 Vec3 eye = {25.0f, 10.0f, 30.0f};
 
 GLFWwindow* window;
+
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -95,75 +99,9 @@ int init(void) {
 
     // Set up matrices as identity for model
     identity(model);
-    
-    float *carObj = loadObj("objects/car.obj", &carSize);
-    GLuint triangleVertexBufferObject;
-    glGenBuffers(1, &triangleVertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVertexBufferObject);
-    // segments ist hier die Anzahl der Vertices. Jeder Vertex hat 8 Floats (3 Pos + 2 Tex + 3 Norm)
-    glBufferData(GL_ARRAY_BUFFER, carSize * 8 * sizeof(float), carObj, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // create vertex array object
-    glGenVertexArrays(1, &vertexArrayObject);
-    glBindVertexArray(vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVertexBufferObject);
-    glVertexAttribPointer(
-        0, // location aus vertex shader
-        3, // wieviele elemente werden rausgenommen?
-        GL_FLOAT,
-        GL_FALSE,
-        8*sizeof(GLfloat), // <--- stride MUSS hier 8 sein! (3+2+3)
-        0
-    );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer( // textur
-        1, // location aus vertex shader
-        2, 
-        GL_FLOAT,
-        GL_FALSE,
-        8*sizeof(GLfloat), // <--- stride MUSS hier 8 sein!
-        (GLvoid*)(3 * sizeof(GLfloat))
-    );
-    glEnableVertexAttribArray(1);
-    
-    glVertexAttribPointer( // normalenvektor
-        2, // location aus vertex shader
-        3, 
-        GL_FLOAT,
-        GL_FALSE,
-        8*sizeof(GLfloat), // <--- stride MUSS hier 8 sein!
-        (GLvoid*)(5 * sizeof(GLfloat))
-    );
-    glEnableVertexAttribArray(2);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
-
-    glGenTextures(1, &carTextureID);
-    glBindTexture(GL_TEXTURE_2D, carTextureID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // fixed min filter to use mipmaps
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("textures/blue_metal_plate_diff_4k.jpg", &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    } else {
-        printf("Failed to load car texture\n");
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-
-    free(carObj);
-    carObj = 0;
+    carObj = object_create("objects/car.obj");
+    load_texture("textures/blue_metal_plate_diff_4k.jpg", &carObj->textureID);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 }
@@ -233,11 +171,7 @@ void draw(void) {
         // 3. DRAW CAR OBJECT 
         // 
 
-        glUseProgram(basicShaderProgram);
-        glBindVertexArray(vertexArrayObject);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, carTextureID);
-
+        
         
         matrix4x4 worldMat;
         // matrix4x4 rotation;
@@ -248,21 +182,15 @@ void draw(void) {
 
         translate(worldMat, worldMat, (Vec3) {-0.7f,0.1f,0.1f});
         scale(translation, translation, (Vec3) {0.5f,0.5f,0.5f});
-        // scale(translation, translation, (Vec3) {2.0f,2.0f,2.0f});
-        
-        // (model * T) * worldMat
         multiply(model, worldMat, translation);  // model = T * S
-        // scale(model, model, (Vec3) {0.1f,0.1f,0.1f});
-        // for (int i = 0; i<16;i++)
-        //     model[i] = 0;
-
+        memcpy(carObj->modelMat, model, sizeof(carObj->modelMat));
+        object_draw(carObj, basicShaderProgram);
         // glUniform1i(glGetUniformLocation(basicShaderProgram, "diffuseTexture"), 0);
+        // glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
+        //                    1, GL_FALSE, (float*)model);
 
-        glUniformMatrix4fv(glGetUniformLocation(basicShaderProgram, "model"),
-                           1, GL_FALSE, (float*)model);
 
-
-                           glDrawArrays(GL_TRIANGLES, 0, carSize);
+        //                    glDrawArrays(GL_TRIANGLES, 0, carSize);
 
 
 

@@ -1,0 +1,19 @@
+#ifndef DRAWOBJ_H
+#define DRAWOBJ_H
+
+#include <GL/glew.h>
+#include "matrix.h"
+
+typedef struct {
+    GLuint VAO;
+    GLuint VBO;
+    GLuint textureID;
+    size_t vertexCount;
+    matrix4x4 modelMat;
+} DrawObject;
+
+DrawObject* object_create(const char* textureFile);
+void load_texture(char *textureFile, GLuint *texture);
+void object_draw(DrawObject* street, GLuint shaderProgram);
+
+#endif

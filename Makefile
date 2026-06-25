@@ -19,7 +19,9 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/skybox.c \
        $(SRC_DIR)/camera.c \
        $(SRC_DIR)/matrix.c \
-       $(SRC_DIR)/vector.c
+       $(SRC_DIR)/vector.c \
+       $(SRC_DIR)/loadObj.c \
+	   $(SRC_DIR)/object_loader.c
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)

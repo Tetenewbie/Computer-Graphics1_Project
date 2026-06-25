@@ -1,5 +1,4 @@
-#ifndef loadobj_c_guard
-#define loadobj_c_guard 1
+#include "loadObj.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -7,16 +6,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-typedef float Vec2[2];
-typedef float Vec3[3];
-
-typedef struct Vertex {
-  Vec3 v;
-  Vec2 vt;
-  Vec3 vn;
-} Vertex;
-
-typedef Vertex Triangle[3];
 
 /**
  * Loads vertex data from an OBJ file.
@@ -114,5 +103,3 @@ float* loadObj(char* location, size_t* vertexCount) {
   *vertexCount = 3 * fCount;
   return (float*)buffer;
 };
-
-#endif
