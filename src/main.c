@@ -28,7 +28,7 @@ DrawObject *carObj = NULL;
 // DrawObject *cloudObj = NULL;
 DrawObject *clouds[16] = {NULL};
 
-DrawObject *otherObjects[4] = {NULL};
+DrawObject *otherObjects[6] = {NULL};
 
 float carZPosition = -50.0f;
 float carAcceleration = 0.0f;
@@ -167,15 +167,40 @@ int init(void) {
   
     // teapot
     otherObjects[3] = object_create("objects/teapot.obj");
-    load_texture("textures/painted_wooden_chair_01_diff_1k.jpg", &otherObjects[3]->textureID);
+    otherObjects[3]->textureID = otherObjects[2]->textureID; // copy texture id from other chair
     translate(model, tableModelMat, (Vec3){0.25f,0.55f,0.0f});
     scale(model, model, (Vec3){0.05f,0.05f,0.05f});
     rotatey(model, model, degrees_to_radians(180));
     // scale(model, model, (Vec3) {5,5,5});
     memcpy(otherObjects[3]->modelMat, model, sizeof(otherObjects[3]->modelMat));
-  
     
     
+    otherObjects[4] = object_create("objects/cube.obj");
+    load_texture("textures/red_brick_diff_1k.jpg", &otherObjects[4]->textureID);
+    
+    identity(model);
+    translate(model, model, (Vec3) {-27, 12, 0});
+
+    
+    scale(model, model, (Vec3) {1.0f, 10.0f, 95.0f});
+    rotatex(model, model, degrees_to_radians(90));
+    memcpy(otherObjects[4]->modelMat, model, sizeof(otherObjects[4]->modelMat));
+    otherObjects[4]->texScale[0] = 4.0f;
+    otherObjects[4]->texScale[1] = 2.0f;
+
+    otherObjects[5] = object_create("objects/cube.obj");
+    otherObjects[5]->textureID = otherObjects[4]->textureID; // copy texture id from other chair
+    
+    identity(model);
+    translate(model, model, (Vec3) {30, 12, 0});
+
+    
+    scale(model, model, (Vec3) {1.0f, 10.0f, 95.0f});
+    rotatex(model, model, degrees_to_radians(90));
+    memcpy(otherObjects[5]->modelMat, model, sizeof(otherObjects[5]->modelMat));
+    otherObjects[5]->texScale[0] = 2.0f;
+    otherObjects[5]->texScale[1] = 2.0f;
+
 
 
 
@@ -203,6 +228,12 @@ void handleInputs(void) {
         // printf("wwww\n");
         carAcceleration = clamp(carAcceleration - 0.05, -2, 2);
         action = true;
+    } 
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        eye[0] += 0.1;
+    } 
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        eye[0] -= 0.1;
     } 
     if (!action) {
         if (carAcceleration >= -0.01 && carAcceleration <= -0.01)

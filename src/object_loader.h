@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include "matrix.h"
+#include "loadObj.h"
 
 typedef struct {
     GLuint VAO;
@@ -10,6 +11,7 @@ typedef struct {
     GLuint textureID;
     size_t vertexCount;
     matrix4x4 modelMat;
+    Vec2 texScale;
 } DrawObject;
 
 DrawObject* object_create(const char* textureFile);

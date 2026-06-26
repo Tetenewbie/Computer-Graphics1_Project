@@ -6,7 +6,7 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 
-
+uniform vec2 texScale; // scale texture on brick wall so that the texture can repeat properly instead of also scaling with the wall 
 uniform sampler2D diffuseTexture;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -37,7 +37,7 @@ void main()
     vec3 specular = specularStrength * spec * lightColor;
 
     //
-    vec3 texColor = texture(diffuseTexture, TexCoords).rgb;
+    vec3 texColor = texture(diffuseTexture, TexCoords*texScale).rgb;
 
     vec3 emission = vec3(0.0,0.0,0.0);
 

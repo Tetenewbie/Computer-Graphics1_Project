@@ -20,7 +20,9 @@ DrawObject* object_create(const char* objectFile)
 DrawObject *object_create_from_vertices(float *carObj, size_t vertexCount) {
     DrawObject* object = malloc(sizeof(DrawObject));
     object->vertexCount = vertexCount;
-    
+    object->texScale[0] = 1.0f;
+    object->texScale[1] = 1.0f;
+
     identity(object->modelMat);
     GLuint triangleVertexBufferObject;
     glGenBuffers(1, &triangleVertexBufferObject);
@@ -105,6 +107,7 @@ void object_draw(DrawObject* object, GLuint shaderProgram)
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"),
         1, GL_FALSE, (float*)object->modelMat);
+    glUniform2f(glGetUniformLocation(shaderProgram, "texScale"), object->texScale[0], object->texScale[1]);
     glBindVertexArray(object->VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, object->textureID);
