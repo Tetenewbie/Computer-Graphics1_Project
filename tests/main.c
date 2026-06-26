@@ -8,7 +8,7 @@ int main(void)
     // Setup global counters
     initialize_test_framework();
 
-    // -- Matrix Operations --
+    // matrix operations
     TEST_CALL(MatrixMath, Identity);
     TEST_CALL(MatrixMath, Multiply);
     TEST_CALL(MatrixMath, Translate);
@@ -21,11 +21,12 @@ int main(void)
     TEST_CALL(MatrixMath, Extract3x3From4x4);
     TEST_CALL(MatrixMath, ComputeNormalMatrix);
 
-    // -- Camera Operations --
+    // amera 
     TEST_CALL(CameraMath, LookAt);
     TEST_CALL(CameraMath, Perspective);
 
-    // -- Vector Operations --
+    // 
+    // Vector operations
     TEST_CALL(VectorMath, Difference);
     TEST_CALL(VectorMath, Normalize);
     TEST_CALL(VectorMath, CrossProduct);

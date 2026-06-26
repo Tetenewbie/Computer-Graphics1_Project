@@ -88,7 +88,7 @@ TEST(CameraMath, Perspective)
         EXPECT_EQ_FLOAT_ARRAY(actual_result, expected_result, 16);
     }
 
-    // Test case 2: Extreme wide-angle perspective (178 deg FOV)
+    // Test case 2: Extreme wide-angle perspective 
     {
         const matrix4x4 expected_result = {
             411.484222f, 0.0f, 0.0f, 0.0f,

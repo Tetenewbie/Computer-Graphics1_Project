@@ -1,5 +1,5 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+// #define STB_IMAGE_IMPLEMENTATION 
+// #include "stb_image.h" // no need to include it here 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,12 +89,12 @@ int init(void) {
         return -1;
     }
 
-    // Create street (you need to provide a street texture)
+    // Create street with texture
     street = street_create("textures/road.png");
     pavement[0] = pavement_create("textures/brick_pavement_03_diff_1k.jpg", true);
     pavement[1] = pavement_create("textures/brick_pavement_03_diff_1k.jpg", false);
 
-    // Create skybox (you need to provide 6 skybox textures)
+    // Create skybox 
     skybox = skybox_create (
         "textures/cloud_east.png",   // 1. Right (+X)
         "textures/cloud_west.png",   // 2. Left  (-X)
@@ -256,9 +256,8 @@ void draw(void) {
         target[2] = carZPosition;
         lookAt(view, eye, target, up);
 
-        // ==========================================
-        // 1. DRAW STREET FIRST
-        // ==========================================
+        //  1st the Street 
+        // 
         glUseProgram(basicShaderProgram);
         
         identity(model);
@@ -298,13 +297,11 @@ void draw(void) {
         street_draw(pavement[0], basicShaderProgram);
         street_draw(pavement[1], basicShaderProgram);
 
-        // ==========================================
-        // 2. DRAW SKYBOX LAST
-        // ==========================================
+        // 
         glDepthFunc(GL_LEQUAL); // Trick the depth buffer
         glUseProgram(skyboxShaderProgram);
         
-        // NOTICE: USING GL_TRUE HERE FOR THE SKYBOX MATRICES TOO!
+    
         glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "projection"),
                            1, GL_FALSE, (float*)projection);
         glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "view"),
@@ -317,7 +314,7 @@ void draw(void) {
 
     
         // 
-        // 3. DRAW CAR OBJECT 
+        // 3 DRAW CAR OBJECT 
         // 
 
         

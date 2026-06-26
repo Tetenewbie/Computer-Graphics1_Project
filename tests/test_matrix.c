@@ -383,7 +383,7 @@ TEST(MatrixMath, Extract3x3From4x4)
 TEST(MatrixMath, ComputeNormalMatrix)
 {
     // Computes the inverse transpose of the upper-left 3x3 section for lighting normals
-    
+    //    
     // Test case 1
     {
         const matrix4x4 input_mat = {
