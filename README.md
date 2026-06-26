@@ -77,7 +77,7 @@ Stellen Sie sicher, dass die folgenden Komponenten auf Ihrem System installiert 
 
 
 
-![Game Screenshot](screenshots/car.png)
+![Game Screenshot](screenshot/car.png)
         
 
                 
