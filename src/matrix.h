@@ -7,6 +7,7 @@
 typedef float matrix4x4[16];
 typedef float matrix3x3[9];
 
+float degrees_to_radians(float d);
 void identity(matrix4x4 out);
 void multiply(matrix4x4 out, const matrix4x4 left, const matrix4x4 right);
 void translate(matrix4x4 out, const matrix4x4 in, const vector3 offset);

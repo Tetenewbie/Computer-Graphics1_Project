@@ -39,8 +39,10 @@ void main()
     //
     vec3 texColor = texture(diffuseTexture, TexCoords).rgb;
 
+    vec3 emission = vec3(0.0,0.0,0.0);
+
     // Multiply the texture color by combined lighting
-    vec3 result = (ambient + diffuse + specular) * texColor;
+    vec3 result = (ambient + diffuse + specular + emission) * texColor;
 
     // FOG MATH
     float distance = length(viewPos - FragPos);
@@ -49,10 +51,9 @@ void main()
     float fogFactor = (fogFar - distance) / (fogFar - fogNear);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
     
-    // A light grayish-blue to match the lower part of your skybox
     vec3 fogColor = vec3(0.6f, 0.7f, 0.8f); 
     
-    // Mix the original color with the fog color based on distance
+    // mix the original color with the fog color based on distance
     vec3 finalColor = mix(fogColor, result, fogFactor);
 
     FragColor = vec4(finalColor, alpha);

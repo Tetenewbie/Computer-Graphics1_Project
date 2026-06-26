@@ -26,7 +26,9 @@ Street *pavement[2];
 Skybox *skybox;
 DrawObject *carObj = NULL;
 // DrawObject *cloudObj = NULL;
-DrawObject *clouds[16];
+DrawObject *clouds[16] = {NULL};
+
+DrawObject *otherObjects[4] = {NULL};
 
 float carZPosition = -50.0f;
 float carAcceleration = 0.0f;
@@ -133,6 +135,50 @@ int init(void) {
         memcpy(clouds[i]->modelMat, model, sizeof(clouds[i]->modelMat));
     // -60, 100
     }
+
+    matrix4x4 tableModelMat;
+    
+    identity(tableModelMat);
+    // table
+    otherObjects[0] = object_create("objects/wooden_stool.obj");
+    load_texture("textures/folding_wooden_stool_diff_1k.jpg", &otherObjects[0]->textureID);
+    
+    translate(tableModelMat, tableModelMat, (Vec3){-15.0f,1.5f,0.0f});
+    scale(tableModelMat, tableModelMat, (Vec3) {5,5,5});
+    memcpy(otherObjects[0]->modelMat, tableModelMat, sizeof(otherObjects[0]->modelMat));
+    
+    // chair
+    otherObjects[1] = object_create("objects/wooden_chair.obj");
+    load_texture("textures/painted_wooden_chair_01_diff_1k.jpg", &otherObjects[1]->textureID);
+    
+    // translate chair model matrix from table model mat, so we can move chair relative to table
+    translate(model, tableModelMat, (Vec3){0.0f,0.0f,-1.0f});
+    // scale(model, model, (Vec3) {5,5,5});
+    memcpy(otherObjects[1]->modelMat, model, sizeof(otherObjects[1]->modelMat));
+    
+    // chair 2
+    otherObjects[2] = object_create("objects/wooden_chair.obj");
+    load_texture("textures/painted_wooden_chair_01_diff_1k.jpg", &otherObjects[2]->textureID);
+    
+    translate(model, tableModelMat, (Vec3){0.0f,0.0f,1.0f});
+    rotatey(model, model, degrees_to_radians(180));
+    // scale(model, model, (Vec3) {5,5,5});
+    memcpy(otherObjects[2]->modelMat, model, sizeof(otherObjects[2]->modelMat));
+  
+    // teapot
+    otherObjects[3] = object_create("objects/teapot.obj");
+    load_texture("textures/painted_wooden_chair_01_diff_1k.jpg", &otherObjects[3]->textureID);
+    translate(model, tableModelMat, (Vec3){0.25f,0.55f,0.0f});
+    scale(model, model, (Vec3){0.05f,0.05f,0.05f});
+    rotatey(model, model, degrees_to_radians(180));
+    // scale(model, model, (Vec3) {5,5,5});
+    memcpy(otherObjects[3]->modelMat, model, sizeof(otherObjects[3]->modelMat));
+  
+    
+    
+
+
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 }
@@ -259,7 +305,14 @@ void draw(void) {
         memcpy(carObj->modelMat, model, sizeof(carObj->modelMat));
         
         object_draw(carObj, basicShaderProgram);
+
         
+        identity(model);
+        for (int i = 0; i < sizeof(otherObjects)/sizeof(DrawObject *); i++) {
+            if (otherObjects[i] == NULL)
+                continue;
+            object_draw(otherObjects[i], basicShaderProgram);
+        }
 
         // 
         // 5. TRANSPARENT OBJECTS
@@ -270,6 +323,7 @@ void draw(void) {
         for (int i = 0; i < 16; i++) {
             object_draw(clouds[i], basicShaderProgram);
         }
+
         glUniform1f(glGetUniformLocation(basicShaderProgram, "alpha"), 1);
         glDisable(GL_BLEND);
         

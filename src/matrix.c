@@ -2,6 +2,13 @@
 #include <math.h>
 #include <string.h>
 
+const double PI = 3.14159265358979323846;
+
+float degrees_to_radians(float degrees) {
+    return degrees * (PI / 180.0);
+}
+
+
 void identity(matrix4x4 out) 
 {
     memset(out, 0, 16 * sizeof(float));
