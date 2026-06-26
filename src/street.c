@@ -58,10 +58,10 @@ Street* pavement_create(const char* textureFile, bool left)
         // --- Curb (Stufe von Straße zu Gehweg) ---
         innerX, streetY,     100.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Bottom Front
         innerX, pavementY,   100.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Top Front
-        innerX, pavementY,   -60.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Top Back
+        innerX, pavementY,   -100.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Top Back
         innerX, streetY,     100.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Bottom Front
-        innerX, pavementY,   -60.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Top Back
-        innerX, streetY,     -60.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Bottom Back
+        innerX, pavementY,   -100.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Top Back
+        innerX, streetY,     -100.0f,        0.0f, 0.0f,         -side, 0.0f, 0.0f, // Bottom Back
     };
 
     street->vertexCount = (sizeof(streetVertices)/sizeof(float)) /8;

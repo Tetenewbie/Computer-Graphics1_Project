@@ -42,7 +42,7 @@ GLuint vertexArrayObject;
 matrix4x4 view, projection, model;
 
 float fovy = 45.0f * 3.14159f / 180.0f;
-Vec3 eye = {25.0f, 10.0f, 30.0f};
+Vec3 eye = {25.0f, 10.0f, 00.0f};
 Vec3 target = {0.0f, 1.5f, -10.0f}; // z coordinate gets changed to aim at car
 Vec3 up = {0.0f, 1.0f, 0.0f}; // always 
 
@@ -122,11 +122,11 @@ int init(void) {
         clouds[i]->textureID = whitenoiseId;
         identity(model);
         if (i < 8)
-            translate(model, model, (Vec3){-7.0f+1.5*i, 0.5f, -50});
+            translate(model, model, (Vec3){-7.0f+1.5*i, 0.5f, -90});
         else
-            translate(model, model, (Vec3){-7.0f+1.5*(i-8), 0.5f, 95});
+            translate(model, model, (Vec3){-7.0f+1.5*(i-8), 0.5f, 90});
             
-        scale(model, model, (Vec3){2.0f, 2.0f, 2.0f});
+        scale(model, model, (Vec3){2.5f, 2.5f, 2.5f});
         rotatex(model, model, rand());
         // rotatey(model, model, rand());
         rotatez(model, model, rand());
@@ -200,7 +200,7 @@ void draw(void) {
                            1, GL_FALSE, (float*)projection);
 
         // Set lighting uniforms
-        vector3 lightPos = {5.0f, 5.0f, 5.0f};
+        vector3 lightPos = {5.0f, 15.0f, 5.0f};
         vector3 lightColor = {1.0f, 1.0f, 1.0f};
         glUniform3f(glGetUniformLocation(basicShaderProgram, "lightPos"),
                     lightPos[0], lightPos[1], lightPos[2]);
